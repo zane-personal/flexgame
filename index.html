@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexbox Mastery Game - 30 Precision Levels</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'Fira Code', monospace; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        /* Ghost Target Pulse Animation */
+        @keyframes ghost-pulse {
+            0%, 100% { border-color: rgba(16, 185, 129, 0.5); background-color: rgba(16, 185, 129, 0.08); }
+            50% { border-color: rgba(16, 185, 129, 0.9); background-color: rgba(16, 185, 129, 0.16); }
+        }
+        .ghost-target {
+            animation: ghost-pulse 2.5s infinite ease-in-out;
+        }
+
+        /* Success Bounce */
+        @keyframes success-pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: success-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900/90 border-b border-slate-800/80 px-4 md:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-cubes-stacked text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base md:text-lg tracking-tight bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent">Flexbox Precision Engine</h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Master CSS Layouts across 30 interactive precision challenges</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+            <!-- Progress Counter -->
+            <div class="bg-slate-950/70 px-3.5 py-1.5 rounded-xl border border-slate-800 text-xs md:text-sm font-medium flex items-center space-x-2">
+                <span class="text-slate-400">Level</span>
+                <span id="current-level-indicator" class="text-indigo-400 font-bold">1</span>
+                <span class="text-slate-600">/</span>
+                <span id="total-levels-indicator" class="text-slate-400">30</span>
+            </div>
+            <!-- Score Counter -->
+            <div class="bg-slate-950/70 px-3.5 py-1.5 rounded-xl border border-slate-800 text-xs md:text-sm font-medium flex items-center space-x-2">
+                <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
+                <span id="score-indicator" class="text-amber-400 font-bold">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Panel: Problem, Code & Options (5 Cols) -->
+        <section class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col shadow-2xl relative overflow-hidden backdrop-blur-sm">
+            <!-- Decorative Subtle Accent Glow -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-3">
+                <span id="level-badge" class="px-3 py-1 bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 text-xs font-semibold rounded-full tracking-wide uppercase">Level 1</span>
+                <span id="property-badge" class="text-xs font-mono text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">justify-content</span>
+            </div>
+
+            <h2 id="level-title" class="text-lg md:text-xl font-bold text-slate-100 mb-2">Aligning along the Main Axis</h2>
+            <p id="level-description" class="text-xs md:text-sm text-slate-300 leading-relaxed mb-5">
+                Align the flex items to land precisely on top of the green target ghost boxes.
+            </p>
+
+            <!-- CSS Code Editor Simulation Panel -->
+            <div class="bg-slate-950 rounded-xl border border-slate-800/90 p-4 mb-5 shadow-inner font-mono text-xs md:text-sm relative">
+                <div class="text-slate-500 text-xs pb-2 mb-2 border-b border-slate-900 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-file-code text-indigo-400"></i> container.css</span>
+                    <span class="text-slate-600 text-[11px]">Flexbox Rule</span>
+                </div>
+                <div class="text-slate-400 space-y-1">
+                    <p class="text-slate-500">.flex-container {</p>
+                    <p class="pl-4 text-slate-400">display: flex;</p>
+                    <!-- Base container default properties if any -->
+                    <div id="static-properties" class="pl-4 text-slate-500 hidden"></div>
+                    <!-- Dynamic user chosen property rule -->
+                    <div id="dynamic-properties" class="pl-4 text-indigo-300 font-semibold transition-all duration-200">
+                        <span class="text-slate-600 italic">/* Choose an alignment rule below */</span>
+                    </div>
+                    <p class="text-slate-500">}</p>
+                </div>
+            </div>
+
+            <!-- Options Selectable Buttons Area -->
+            <div class="space-y-2.5 mb-6" id="options-container">
+                <!-- Inject option buttons -->
+            </div>
+
+            <!-- Navigation & Next Level Buttons -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-800/80 mt-auto">
+                <button id="prev-btn" onclick="prevLevel()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-xs md:text-sm transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-2">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                    <span>Prev</span>
+                </button>
+                <button id="next-btn" onclick="nextLevel()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs md:text-sm transition shadow-lg shadow-indigo-600/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-2" disabled>
+                    <span>Next Level</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Right Panel: Precision Visualizer Workspace (7 Cols) -->
+        <section class="lg:col-span-7 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col shadow-2xl relative overflow-hidden backdrop-blur-sm h-[520px]">
+            
+            <!-- Visualizer Header Toolbar -->
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800/60">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                    <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                    <span class="text-xs text-slate-400 font-mono ml-2">live-viewport.html</span>
+                </div>
+                
+                <!-- Axis Direction Visual Indicator Badge -->
+                <div class="flex items-center space-x-3 text-xs">
+                    <div class="flex items-center space-x-1.5 text-indigo-400 bg-indigo-950/60 px-2.5 py-1 rounded-md border border-indigo-800/40 font-mono">
+                        <i id="main-axis-icon" class="fa-solid fa-arrow-right text-[10px]"></i>
+                        <span id="main-axis-text">Main: Row</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40 font-mono">
+                        <i id="cross-axis-icon" class="fa-solid fa-arrow-down text-[10px]"></i>
+                        <span id="cross-axis-text">Cross: Col</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Main Game Board Playground -->
+            <div class="flex-1 bg-slate-950/90 border border-slate-800/90 rounded-xl relative overflow-hidden shadow-inner flex flex-col justify-center" id="game-playground">
+                
+                <!-- Grid background lines overlay for spatial context -->
+                <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none"></div>
+
+                <!-- Mirror Target Layer (Target ghost blocks) -->
+                <div id="target-ghost-container" class="absolute inset-0 p-4 md:p-6 pointer-events-none transition-all duration-300 z-0">
+                    <!-- Target Ghost Elements dynamically placed here -->
+                </div>
+
+                <!-- Interactive User Live Flex Container -->
+                <div id="live-flex-container" class="absolute inset-0 p-4 md:p-6 z-10 transition-all duration-500">
+                    <!-- Live Flex Items -->
+                </div>
+
+            </div>
+
+            <!-- Match Banner / Success Feedback -->
+            <div id="success-banner" class="hidden mt-4 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 p-3.5 rounded-xl flex items-center justify-between animate-pop shadow-lg shadow-emerald-950/50">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-500 text-slate-950 w-8 h-8 rounded-lg font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs md:text-sm text-emerald-200">Exact Match Confirmed!</h4>
+                        <p class="text-[11px] text-emerald-400/90">Flex items aligned perfectly over the ghost target blocks.</p>
+                    </div>
+                </div>
+                <button onclick="nextLevel()" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs transition shadow">
+                    Continue &rarr;
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Completion Modal -->
+    <div id="completion-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 max-w-md w-full rounded-2xl p-6 md:p-8 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4 shadow-lg shadow-amber-500/10">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-white mb-2">Flexbox Grandmaster! 🎉</h3>
+            <p class="text-xs md:text-sm text-slate-300 mb-6">You solved all 30 flexbox precision challenges with 100% accuracy!</p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6 flex justify-around">
+                <div>
+                    <span class="text-[11px] text-slate-500 uppercase tracking-wider block font-semibold">Total Score</span>
+                    <span id="final-score" class="text-2xl font-bold text-indigo-400">300</span>
+                </div>
+                <div class="border-r border-slate-800"></div>
+                <div>
+                    <span class="text-[11px] text-slate-500 uppercase tracking-wider block font-semibold">Levels</span>
+                    <span class="text-2xl font-bold text-emerald-400">30 / 30</span>
+                </div>
+            </div>
+            <button onclick="resetGame()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-600/30 text-sm">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Game Logic with Precision Engine & 30 Levels -->
+    <script>
+        const levels = [
+            // --- BASIC CONTAINER ALIGNMENT (1 - 5) ---
+            {
+                id: 1, property: "justify-content", title: "Horizontal Main Axis End",
+                description: "Align all flex items to the far end of the horizontal main axis.",
+                baseCSS: "display: flex; align-items: center;",
+                targetCSS: "display: flex; justify-content: flex-end; align-items: center;",
+                items: [{ id: 1, label: "Item 1", color: "bg-indigo-500" }, { id: 2, label: "Item 2", color: "bg-cyan-500" }],
+                correctOption: 1,
+                options: [
+                    { code: "justify-content: flex-start;", label: "justify-content: flex-start;" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end;" },
+                    { code: "justify-content: center;", label: "justify-content: center;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" }
+                ]
+            },
+            {
+                id: 2, property: "justify-content", title: "Centering along Main Axis",
+                description: "Center the flex items horizontally inside the flex container.",
+                baseCSS: "display: flex; align-items: center;",
+                targetCSS: "display: flex; justify-content: center; align-items: center;",
+                items: [{ id: 1, label: "Item 1", color: "bg-indigo-500" }, { id: 2, label: "Item 2", color: "bg-violet-500" }],
+                correctOption: 0,
+                options: [
+                    { code: "justify-content: center;", label: "justify-content: center;" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end;" },
+                    { code: "justify-content: space-around;", label: "justify-content: space-around;" },
+                    { code: "align-items: center;", label: "align-items: center;" }
+                ]
+            },
+            {
+                id: 3, property: "justify-content", title: "Space-Between Distribution",
+                description: "Push the first and last items to the edges with equal space between them.",
+                baseCSS: "display: flex; align-items: center;",
+                targetCSS: "display: flex; justify-content: space-between; align-items: center;",
+                items: [{ id: 1, label: "Item 1", color: "bg-emerald-500" }, { id: 2, label: "Item 2", color: "bg-teal-500" }, { id: 3, label: "Item 3", color: "bg-cyan-500" }],
+                correctOption: 2,
+                options: [
+                    { code: "justify-content: space-around;", label: "justify-content: space-around;" },
+                    { code: "justify-content: center;", label: "justify-content: center;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" },
+                    { code: "justify-content: space-evenly;", label: "justify-content: space-evenly;" }
+                ]
+            },
+            {
+                id: 4, property: "align-items", title: "Vertical Cross Axis Alignment",
+                description: "Align all flex items to the bottom of the container along the cross axis.",
+                baseCSS: "display: flex; justify-content: center;",
+                targetCSS: "display: flex; justify-content: center; align-items: flex-end;",
+                items: [{ id: 1, label: "Item 1", color: "bg-rose-500" }, { id: 2, label: "Item 2", color: "bg-pink-500" }],
+                correctOption: 1,
+                options: [
+                    { code: "align-items: flex-start;", label: "align-items: flex-start;" },
+                    { code: "align-items: flex-end;", label: "align-items: flex-end;" },
+                    { code: "align-items: center;", label: "align-items: center;" },
+                    { code: "align-items: stretch;", label: "align-items: stretch;" }
+                ]
+            },
+            {
+                id: 5, property: "align-items", title: "Cross Axis Centering",
+                description: "Center items vertically across the cross axis while keeping them centered horizontally.",
+                baseCSS: "display: flex; justify-content: center;",
+                targetCSS: "display: flex; justify-content: center; align-items: center;",
+                items: [{ id: 1, label: "Box A", color: "bg-amber-500" }, { id: 2, label: "Box B", color: "bg-orange-500" }],
+                correctOption: 3,
+                options: [
+                    { code: "align-items: flex-start;", label: "align-items: flex-start;" },
+                    { code: "align-items: stretch;", label: "align-items: stretch;" },
+                    { code: "align-items: flex-end;", label: "align-items: flex-end;" },
+                    { code: "align-items: center;", label: "align-items: center;" }
+                ]
+            },
+
+            // --- FLEX DIRECTION & REVERSE (6 - 10) ---
+            {
+                id: 6, property: "flex-direction", title: "Vertical Stacking",
+                description: "Change the main axis direction to stack items vertically into a column.",
+                baseCSS: "display: flex; justify-content: center; align-items: center;",
+                targetCSS: "display: flex; flex-direction: column; justify-content: center; align-items: center;",
+                items: [{ id: 1, label: "1", color: "bg-blue-600" }, { id: 2, label: "2", color: "bg-sky-500" }],
+                correctOption: 0,
+                options: [
+                    { code: "flex-direction: column;", label: "flex-direction: column;" },
+                    { code: "flex-direction: row;", label: "flex-direction: row;" },
+                    { code: "flex-direction: column-reverse;", label: "flex-direction: column-reverse;" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse;" }
+                ]
+            },
+            {
+                id: 7, property: "flex-direction", title: "Horizontal Row Reverse",
+                description: "Reverse the horizontal order of items along the main axis.",
+                baseCSS: "display: flex; justify-content: center; align-items: center;",
+                targetCSS: "display: flex; flex-direction: row-reverse; justify-content: center; align-items: center;",
+                items: [{ id: 1, label: "First", color: "bg-indigo-500" }, { id: 2, label: "Second", color: "bg-purple-500" }],
+                correctOption: 1,
+                options: [
+                    { code: "flex-direction: column-reverse;", label: "flex-direction: column-reverse;" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse;" },
+                    { code: "flex-direction: column;", label: "flex-direction: column;" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end;" }
+                ]
+            },
+            {
+                id: 8, property: "flex-direction", title: "Column Direction Main Axis End",
+                description: "In column direction, move items to the bottom of the column.",
+                baseCSS: "display: flex; flex-direction: column; align-items: center;",
+                targetCSS: "display: flex; flex-direction: column; justify-content: flex-end; align-items: center;",
+                items: [{ id: 1, label: "Top", color: "bg-emerald-600" }, { id: 2, label: "Bottom", color: "bg-teal-600" }],
+                correctOption: 2,
+                options: [
+                    { code: "align-items: flex-end;", label: "align-items: flex-end;" },
+                    { code: "align-items: center;", label: "align-items: center;" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" }
+                ]
+            },
+            {
+                id: 9, property: "flex-direction", title: "Column Reverse Order",
+                description: "Stack items vertically in reverse direction so the last item appears on top.",
+                baseCSS: "display: flex; justify-content: center; align-items: center;",
+                targetCSS: "display: flex; flex-direction: column-reverse; justify-content: center; align-items: center;",
+                items: [{ id: 1, label: "Item 1", color: "bg-fuchsia-500" }, { id: 2, label: "Item 2", color: "bg-pink-500" }],
+                correctOption: 0,
+                options: [
+                    { code: "flex-direction: column-reverse;", label: "flex-direction: column-reverse;" },
+                    { code: "flex-direction: column;", label: "flex-direction: column;" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse;" },
+                    { code: "align-items: flex-end;", label: "align-items: flex-end;" }
+                ]
+            },
+            {
+                id: 10, property: "justify-content", title: "Space-Evenly Alignment",
+                description: "Distribute equal spacing around all items and edges.",
+                baseCSS: "display: flex; align-items: center;",
+                targetCSS: "display: flex; justify-content: space-evenly; align-items: center;",
+                items: [{ id: 1, label: "A", color: "bg-amber-500" }, { id: 2, label: "B", color: "bg-rose-500" }, { id: 3, label: "C", color: "bg-indigo-500" }],
+                correctOption: 3,
+                options: [
+                    { code: "justify-content: space-around;", label: "justify-content: space-around;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" },
+                    { code: "justify-content: center;", label: "justify-content: center;" },
+                    { code: "justify-content: space-evenly;", label: "justify-content: space-evenly;" }
+                ]
+            },
+
+            // --- WRAPPING & MULTI-LINE ALIGN-CONTENT (11 - 15) ---
+            {
+                id: 11, property: "flex-wrap", title: "Enabling Multi-line Wrap",
+                description: "Allow flex items to wrap onto a new line when container width is exceeded.",
+                baseCSS: "display: flex; justify-content: flex-start; align-items: flex-start;",
+                targetCSS: "display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: flex-start;",
+                items: [
+                    { id: 1, label: "Card 1", color: "bg-indigo-500", class: "w-36" },
+                    { id: 2, label: "Card 2", color: "bg-cyan-500", class: "w-36" },
+                    { id: 3, label: "Card 3", color: "bg-emerald-500", class: "w-36" },
+                    { id: 4, label: "Card 4", color: "bg-violet-500", class: "w-36" }
+                ],
+                correctOption: 1,
+                options: [
+                    { code: "flex-wrap: nowrap;", label: "flex-wrap: nowrap;" },
+                    { code: "flex-wrap: wrap;", label: "flex-wrap: wrap;" },
+                    { code: "flex-wrap: wrap-reverse;", label: "flex-wrap: wrap-reverse;" },
+                    { code: "flex-direction: column;", label: "flex-direction: column;" }
+                ]
+            },
+            {
+                id: 12, property: "align-content", title: "Multi-line Center Packing",
+                description: "Pack wrapped lines together at the center of the cross axis.",
+                baseCSS: "display: flex; flex-wrap: wrap; justify-content: center;",
+                targetCSS: "display: flex; flex-wrap: wrap; align-content: center; justify-content: center;",
+                items: [
+                    { id: 1, label: "1", color: "bg-indigo-500", class: "w-36" },
+                    { id: 2, label: "2", color: "bg-purple-500", class: "w-36" },
+                    { id: 3, label: "3", color: "bg-pink-500", class: "w-36" },
+                    { id: 4, label: "4", color: "bg-rose-500", class: "w-36" }
+                ],
+                correctOption: 0,
+                options: [
+                    { code: "align-content: center;", label: "align-content: center;" },
+                    { code: "align-items: center;", label: "align-items: center;" },
+                    { code: "align-content: space-between;", label: "align-content: space-between;" },
+                    { code: "justify-content: center;", label: "justify-content: center;" }
+                ]
+            },
+            {
+                id: 13, property: "align-content", title: "Multi-line Bottom Alignment",
+                description: "Align all wrapped lines to the bottom of the container.",
+                baseCSS: "display: flex; flex-wrap: wrap; justify-content: center;",
+                targetCSS: "display: flex; flex-wrap: wrap; align-content: flex-end; justify-content: center;",
+                items: [
+                    { id: 1, label: "Box 1", color: "bg-teal-500", class: "w-36" },
+                    { id: 2, label: "Box 2", color: "bg-emerald-500", class: "w-36" },
+                    { id: 3, label: "Box 3", color: "bg-cyan-500", class: "w-36" }
+                ],
+                correctOption: 2,
+                options: [
+                    { code: "align-items: flex-end;", label: "align-items: flex-end;" },
+                    { code: "align-content: flex-start;", label: "align-content: flex-start;" },
+                    { code: "align-content: flex-end;", label: "align-content: flex-end;" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end;" }
+                ]
+            },
+            {
+                id: 14, property: "flex-wrap", title: "Reverse Line Wrapping",
+                description: "Wrap lines in reverse order so new lines appear above previous ones.",
+                baseCSS: "display: flex; align-content: center; justify-content: center;",
+                targetCSS: "display: flex; flex-wrap: wrap-reverse; align-content: center; justify-content: center;",
+                items: [
+                    { id: 1, label: "A", color: "bg-blue-600", class: "w-36" },
+                    { id: 2, label: "B", color: "bg-indigo-600", class: "w-36" },
+                    { id: 3, label: "C", color: "bg-violet-600", class: "w-36" }
+                ],
+                correctOption: 3,
+                options: [
+                    { code: "flex-wrap: nowrap;", label: "flex-wrap: nowrap;" },
+                    { code: "flex-wrap: wrap;", label: "flex-wrap: wrap;" },
+                    { code: "flex-direction: column-reverse;", label: "flex-direction: column-reverse;" },
+                    { code: "flex-wrap: wrap-reverse;", label: "flex-wrap: wrap-reverse;" }
+                ]
+            },
+            {
+                id: 15, property: "align-content", title: "Space-Between Multi-line",
+                description: "Distribute wrapped lines evenly with space between them across the cross axis.",
+                baseCSS: "display: flex; flex-wrap: wrap; justify-content: center;",
+                targetCSS: "display: flex; flex-wrap: wrap; align-content: space-between; justify-content: center;",
+                items: [
+                    { id: 1, label: "Line 1-A", color: "bg-amber-500", class: "w-36" },
+                    { id: 2, label: "Line 1-B", color: "bg-orange-500", class: "w-36" },
+                    { id: 3, label: "Line 2-A", color: "bg-rose-500", class: "w-36" },
+                    { id: 4, label: "Line 2-B", color: "bg-pink-500", class: "w-36" }
+                ],
+                correctOption: 1,
+                options: [
+                    { code: "align-content: space-around;", label: "align-content: space-around;" },
+                    { code: "align-content: space-between;", label: "align-content: space-between;" },
+                    { code: "align-items: space-between;", label: "align-items: space-between;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" }
+                ]
+            },
+
+            // --- ITEM-LEVEL ALIGN-SELF & ORDER (16 - 20) ---
+            {
+                id: 16, property: "align-self", title: "Individual Item Bottom Alignment",
+                description: "Align only Item 2 to the bottom while other items remain at the top.",
+                baseCSS: "display: flex; justify-content: space-around; align-items: flex-start;",
+                targetCSS: "display: flex; justify-content: space-around; align-items: flex-start;",
+                items: [
+                    { id: 1, label: "Top 1", color: "bg-slate-700" },
+                    { id: 2, label: "Bottom Self", color: "bg-emerald-500", targetStyle: "align-self: flex-end;" },
+                    { id: 3, label: "Top 2", color: "bg-slate-700" }
+                ],
+                targetItemIndex: 1,
+                correctOption: 0,
+                options: [
+                    { code: "align-self: flex-end;", label: "align-self: flex-end (on Item 2)" },
+                    { code: "align-items: flex-end;", label: "align-items: flex-end (on Container)" },
+                    { code: "align-self: center;", label: "align-self: center (on Item 2)" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end" }
+                ]
+            },
+            {
+                id: 17, property: "align-self", title: "Individual Item Centering",
+                description: "Center only Item 2 vertically while others sit at the top.",
+                baseCSS: "display: flex; justify-content: space-around; align-items: flex-start;",
+                targetCSS: "display: flex; justify-content: space-around; align-items: flex-start;",
+                items: [
+                    { id: 1, label: "Top 1", color: "bg-slate-700" },
+                    { id: 2, label: "Center Self", color: "bg-cyan-500", targetStyle: "align-self: center;" },
+                    { id: 3, label: "Top 2", color: "bg-slate-700" }
+                ],
+                targetItemIndex: 1,
+                correctOption: 2,
+                options: [
+                    { code: "align-items: center;", label: "align-items: center (on Container)" },
+                    { code: "align-self: flex-end;", label: "align-self: flex-end (on Item 2)" },
+                    { code: "align-self: center;", label: "align-self: center (on Item 2)" },
+                    { code: "align-self: stretch;", label: "align-self: stretch (on Item 2)" }
+                ]
+            },
+            {
+                id: 18, property: "order", title: "Moving Item to the End",
+                description: "Change the visual order of Item 1 so it renders last.",
+                baseCSS: "display: flex; justify-content: space-around; align-items: center;",
+                targetCSS: "display: flex; justify-content: space-around; align-items: center;",
+                items: [
+                    { id: 1, label: "Item 1 (Target)", color: "bg-indigo-500", targetStyle: "order: 1;" },
+                    { id: 2, label: "Item 2", color: "bg-slate-700" },
+                    { id: 3, label: "Item 3", color: "bg-slate-700" }
+                ],
+                targetItemIndex: 0,
+                correctOption: 1,
+                options: [
+                    { code: "order: -1;", label: "order: -1 (on Item 1)" },
+                    { code: "order: 1;", label: "order: 1 (on Item 1)" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse" },
+                    { code: "justify-content: flex-end;", label: "justify-content: flex-end" }
+                ]
+            },
+            {
+                id: 19, property: "order", title: "Moving Item to the Front",
+                description: "Use negative order on Item 3 so it renders first.",
+                baseCSS: "display: flex; justify-content: space-around; align-items: center;",
+                targetCSS: "display: flex; justify-content: space-around; align-items: center;",
+                items: [
+                    { id: 1, label: "Item 1", color: "bg-slate-700" },
+                    { id: 2, label: "Item 2", color: "bg-slate-700" },
+                    { id: 3, label: "Item 3 (Target)", color: "bg-amber-500", targetStyle: "order: -1;" }
+                ],
+                targetItemIndex: 2,
+                correctOption: 0,
+                options: [
+                    { code: "order: -1;", label: "order: -1 (on Item 3)" },
+                    { code: "order: 1;", label: "order: 1 (on Item 3)" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse" },
+                    { code: "align-self: flex-start;", label: "align-self: flex-start" }
+                ]
+            },
+            {
+                id: 20, property: "align-self", title: "Item Stretching",
+                description: "Make Item 2 stretch vertically to fill container height while others stay centered.",
+                baseCSS: "display: flex; justify-content: space-around; align-items: center;",
+                targetCSS: "display: flex; justify-content: space-around; align-items: center;",
+                items: [
+                    { id: 1, label: "Box 1", color: "bg-slate-700" },
+                    { id: 2, label: "Stretch Box", color: "bg-purple-500", targetStyle: "align-self: stretch;" },
+                    { id: 3, label: "Box 3", color: "bg-slate-700" }
+                ],
+                targetItemIndex: 1,
+                correctOption: 3,
+                options: [
+                    { code: "align-items: stretch;", label: "align-items: stretch (on Container)" },
+                    { code: "height: 100%;", label: "height: 100%" },
+                    { code: "align-self: center;", label: "align-self: center (on Item 2)" },
+                    { code: "align-self: stretch;", label: "align-self: stretch (on Item 2)" }
+                ]
+            },
+
+            // --- GAP & FLEX SHORTHAND / FLEX-FLOW (21 - 25) ---
+            {
+                id: 21, property: "gap", title: "Container Spacing Gap",
+                description: "Add an explicit 2rem gap between all items.",
+                baseCSS: "display: flex; justify-content: center; align-items: center;",
+                targetCSS: "display: flex; justify-content: center; align-items: center; gap: 2rem;",
+                items: [
+                    { id: 1, label: "Box 1", color: "bg-indigo-500" },
+                    { id: 2, label: "Box 2", color: "bg-cyan-500" },
+                    { id: 3, label: "Box 3", color: "bg-teal-500" }
+                ],
+                correctOption: 0,
+                options: [
+                    { code: "gap: 2rem;", label: "gap: 2rem;" },
+                    { code: "margin: 2rem;", label: "margin: 2rem;" },
+                    { code: "padding: 2rem;", label: "padding: 2rem;" },
+                    { code: "justify-content: space-between;", label: "justify-content: space-between;" }
+                ]
+            },
+            {
+                id: 22, property: "flex-flow", title: "Flex-Flow Shorthand",
+                description: "Use shorthand `flex-flow` to combine `column` direction with `wrap`.",
+                baseCSS: "display: flex; align-content: center; justify-content: center;",
+                targetCSS: "display: flex; flex-flow: column wrap; align-content: center; justify-content: center;",
+                items: [
+                    { id: 1, label: "Item 1", color: "bg-rose-500" },
+                    { id: 2, label: "Item 2", color: "bg-pink-500" },
+                    { id: 3, label: "Item 3", color: "bg-fuchsia-500" }
+                ],
+                correctOption: 1,
+                options: [
+                    { code: "flex-flow: row wrap;", label: "flex-flow: row wrap;" },
+                    { code: "flex-flow: column wrap;", label: "flex-flow: column wrap;" },
+                    { code: "flex-direction: column;", label: "flex-direction: column;" },
+                    { code: "flex-wrap: wrap;", label: "flex-wrap: wrap;" }
+                ]
+            },
+            {
+                id: 23, property: "gap", title: "Asymmetric Row & Column Gap",
+                description: "Set vertical row gap to 1rem and horizontal column gap to 2.5rem.",
+                baseCSS: "display: flex; flex-wrap: wrap; justify-content: center; align-content: center;",
+                targetCSS: "display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 1rem 2.5rem;",
+                items: [
+                    { id: 1, label: "1", color: "bg-emerald-500", class: "w-32" },
+                    { id: 2, label: "2", color: "bg-teal-500", class: "w-32" },
+                    { id: 3, label: "3", color: "bg-cyan-500", class: "w-32" },
+                    { id: 4, label: "4", color: "bg-blue-500", class: "w-32" }
+                ],
+                correctOption: 2,
+                options: [
+                    { code: "gap: 2.5rem 1rem;", label: "gap: 2.5rem 1rem;" },
+                    { code: "gap: 2.5rem;", label: "gap: 2.5rem;" },
+                    { code: "gap: 1rem 2.5rem;", label: "gap: 1rem 2.5rem;" },
+                    { code: "row-gap: 2.5rem;", label: "row-gap: 2.5rem;" }
+                ]
+            },
+            {
+                id: 24, property: "align-items", title: "Baseline Text Alignment",
+                description: "Align items along their text baseline regardless of varying font sizes.",
+                baseCSS: "display: flex; justify-content: center;",
+                targetCSS: "display: flex; justify-content: center; align-items: baseline;",
+                items: [
+                    { id: 1, label: "Small text", color: "bg-slate-700 text-xs py-2" },
+                    { id: 2, label: "Giant Text", color: "bg-indigo-600 text-xl py-5" },
+                    { id: 3, label: "Medium", color: "bg-slate-700 text-sm py-3" }
+                ],
+                correctOption: 0,
+                options: [
+                    { code: "align-items: baseline;", label: "align-items: baseline;" },
+                    { code: "align-items: center;", label: "align-items: center;" },
+                    { code: "align-items: flex-start;", label: "align-items: flex-start;" },
+                    { code: "align-items: stretch;", label: "align-items: stretch;" }
+                ]
+            },
+            {
+                id: 25, property: "flex-flow", title: "Row Reverse Wrap",
+                description: "Combine row-reverse direction with wrap using flex-flow shorthand.",
+                baseCSS: "display: flex; justify-content: center; align-content: center;",
+                targetCSS: "display: flex; flex-flow: row-reverse wrap; justify-content: center; align-content: center;",
+                items: [
+                    { id: 1, label: "Item 1", color: "bg-purple-600", class: "w-36" },
+                    { id: 2, label: "Item 2", color: "bg-violet-600", class: "w-36" },
+                    { id: 3, label: "Item 3", color: "bg-indigo-600", class: "w-36" }
+                ],
+                correctOption: 3,
+                options: [
+                    { code: "flex-flow: row wrap;", label: "flex-flow: row wrap;" },
+                    { code: "flex-flow: column-reverse wrap;", label: "flex-flow: column-reverse wrap;" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse;" },
+                    { code: "flex-flow: row-reverse wrap;", label: "flex-flow: row-reverse wrap;" }
+                ]
+            },
+
+            // --- ADVANCED MASTER COMBINATIONS (26 - 30) ---
+            {
+                id: 26, property: "combined", title: "Column Center with Custom Gap",
+                description: "Combine column direction, main & cross axis centering, and a 1.5rem gap.",
+                baseCSS: "display: flex;",
+                targetCSS: "display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1.5rem;",
+                items: [
+                    { id: 1, label: "Card A", color: "bg-indigo-500" },
+                    { id: 2, label: "Card B", color: "bg-cyan-500" }
+                ],
+                correctOption: 1,
+                options: [
+                    { code: "justify-content: center; align-items: center;", label: "justify-content: center; align-items: center;" },
+                    { code: "flex-direction: column; justify-content: center; align-items: center; gap: 1.5rem;", label: "flex-direction: column; justify-content: center; align-items: center; gap: 1.5rem;" },
+                    { code: "flex-direction: column; align-content: center;", label: "flex-direction: column; align-content: center;" },
+                    { code: "align-items: center; gap: 1.5rem;", label: "align-items: center; gap: 1.5rem;" }
+                ]
+            },
+            {
+                id: 27, property: "combined", title: "Space-Between with Align End",
+                description: "Spread items across the main axis while aligning them at the bottom.",
+                baseCSS: "display: flex;",
+                targetCSS: "display: flex; justify-content: space-between; align-items: flex-end;",
+                items: [
+                    { id: 1, label: "Left Bottom", color: "bg-emerald-500" },
+                    { id: 2, label: "Right Bottom", color: "bg-teal-500" }
+                ],
+                correctOption: 2,
+                options: [
+                    { code: "justify-content: center; align-items: flex-end;", label: "justify-content: center; align-items: flex-end;" },
+                    { code: "justify-content: space-around; align-items: center;", label: "justify-content: space-around; align-items: center;" },
+                    { code: "justify-content: space-between; align-items: flex-end;", label: "justify-content: space-between; align-items: flex-end;" },
+                    { code: "align-content: flex-end;", label: "align-content: flex-end;" }
+                ]
+            },
+            {
+                id: 28, property: "combined", title: "Wrapped Space-Around Grid",
+                description: "Wrap items across lines and space lines evenly with centered items.",
+                baseCSS: "display: flex;",
+                targetCSS: "display: flex; flex-wrap: wrap; justify-content: space-around; align-content: space-around;",
+                items: [
+                    { id: 1, label: "Grid 1", color: "bg-amber-500", class: "w-36" },
+                    { id: 2, label: "Grid 2", color: "bg-orange-500", class: "w-36" },
+                    { id: 3, label: "Grid 3", color: "bg-rose-500", class: "w-36" },
+                    { id: 4, label: "Grid 4", color: "bg-pink-500", class: "w-36" }
+                ],
+                correctOption: 0,
+                options: [
+                    { code: "flex-wrap: wrap; justify-content: space-around; align-content: space-around;", label: "flex-wrap: wrap; justify-content: space-around; align-content: space-around;" },
+                    { code: "flex-wrap: wrap; justify-content: center; align-items: center;", label: "flex-wrap: wrap; justify-content: center; align-items: center;" },
+                    { code: "flex-direction: column; justify-content: space-around;", label: "flex-direction: column; justify-content: space-around;" },
+                    { code: "align-content: space-between;", label: "align-content: space-between;" }
+                ]
+            },
+            {
+                id: 29, property: "combined", title: "Column-Reverse End Alignment",
+                description: "Reverse column order and align items to the bottom of the container.",
+                baseCSS: "display: flex;",
+                targetCSS: "display: flex; flex-direction: column-reverse; justify-content: flex-start; align-items: center;",
+                items: [
+                    { id: 1, label: "Bottom Box", color: "bg-blue-600" },
+                    { id: 2, label: "Above Box", color: "bg-indigo-600" }
+                ],
+                correctOption: 3,
+                options: [
+                    { code: "flex-direction: column; justify-content: flex-end;", label: "flex-direction: column; justify-content: flex-end;" },
+                    { code: "flex-direction: column-reverse; justify-content: flex-end;", label: "flex-direction: column-reverse; justify-content: flex-end;" },
+                    { code: "flex-direction: row-reverse;", label: "flex-direction: row-reverse;" },
+                    { code: "flex-direction: column-reverse; justify-content: flex-start; align-items: center;", label: "flex-direction: column-reverse; justify-content: flex-start; align-items: center;" }
+                ]
+            },
+            {
+                id: 30, property: "combined", title: "Grandmaster Layout Challenge",
+                description: "Combine column-reverse direction, space-between distribution, and center cross-axis alignment.",
+                baseCSS: "display: flex;",
+                targetCSS: "display: flex; flex-direction: column-reverse; justify-content: space-between; align-items: center;",
+                items: [
+                    { id: 1, label: "Bottom End", color: "bg-gradient-to-r from-purple-500 to-indigo-500" },
+                    { id: 2, label: "Top Start", color: "bg-gradient-to-r from-pink-500 to-rose-500" }
+                ],
+                correctOption: 1,
+                options: [
+                    { code: "flex-direction: column; justify-content: space-between; align-items: center;", label: "flex-direction: column; justify-content: space-between; align-items: center;" },
+                    { code: "flex-direction: column-reverse; justify-content: space-between; align-items: center;", label: "flex-direction: column-reverse; justify-content: space-between; align-items: center;" },
+                    { code: "flex-direction: column-reverse; justify-content: center; align-items: center;", label: "flex-direction: column-reverse; justify-content: center; align-items: center;" },
+                    { code: "justify-content: space-around; align-items: center;", label: "justify-content: space-around; align-items: center;" }
+                ]
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let score = 0;
+        let isLevelCompleted = false;
+
+        function initGame() {
+            document.getElementById('total-levels-indicator').textContent = levels.length;
+            loadLevel(currentLevelIndex);
+        }
+
+        function loadLevel(index) {
+            const level = levels[index];
+            isLevelCompleted = false;
+
+            // Update Header Indicators
+            document.getElementById('current-level-indicator').textContent = index + 1;
+            document.getElementById('score-indicator').textContent = score;
+
+            // Update Left Panel Badges & Text
+            document.getElementById('level-badge').textContent = `Level ${index + 1}`;
+            document.getElementById('property-badge').textContent = level.property;
+            document.getElementById('level-title').textContent = level.title;
+            document.getElementById('level-description').textContent = level.description;
+
+            // Code View Static Base Properties
+            const staticPropsEl = document.getElementById('static-properties');
+            if (level.baseCSS && level.baseCSS.replace('display: flex;', '').trim()) {
+                staticPropsEl.classList.remove('hidden');
+                staticPropsEl.textContent = level.baseCSS.replace('display: flex;', '').trim();
+            } else {
+                staticPropsEl.classList.add('hidden');
+            }
+
+            // Reset CSS code view placeholder
+            document.getElementById('dynamic-properties').innerHTML = `<span class="text-slate-600 italic">/* Select correct rule below */</span>`;
+
+            // Render Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            level.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left px-4 py-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800/80 text-xs md:text-sm font-mono text-slate-300 transition flex items-center justify-between group cursor-pointer`;
+                btn.innerHTML = `
+                    <span class="flex items-center space-x-3 overflow-hidden">
+                        <span class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-xs text-slate-400 shrink-0 group-hover:border-indigo-500 group-hover:text-indigo-400 font-sans">${String.fromCharCode(65 + idx)}</span>
+                        <span class="truncate">${opt.label}</span>
+                    </span>
+                    <i class="fa-regular fa-circle text-slate-700 group-hover:text-indigo-400 shrink-0 ml-2"></i>
+                `;
+                btn.onclick = () => selectOption(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            // 1. Render Ghost Target Container
+            const ghostContainer = document.getElementById('target-ghost-container');
+            ghostContainer.style.cssText = level.targetCSS;
+            ghostContainer.innerHTML = '';
+
+            level.items.forEach(item => {
+                const ghostNode = document.createElement('div');
+                const extraClass = item.class || 'w-24';
+                ghostNode.className = `${extraClass} h-14 border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 text-xs font-mono font-bold ghost-target transition-all duration-300 opacity-90`;
+                if (item.targetStyle) ghostNode.style.cssText = item.targetStyle;
+                ghostNode.innerHTML = `<span class="text-[10px] uppercase tracking-wider text-emerald-400/80">Goal ${item.id}</span>`;
+                ghostContainer.appendChild(ghostNode);
+            });
+
+            // 2. Render Live Flex Container
+            const liveContainer = document.getElementById('live-flex-container');
+            liveContainer.style.cssText = level.baseCSS || "display: flex;";
+            liveContainer.className = "absolute inset-0 p-4 md:p-6 z-10 transition-all duration-500 ease-out";
+            liveContainer.innerHTML = '';
+
+            level.items.forEach(item => {
+                const liveNode = document.createElement('div');
+                const extraClass = item.class || 'w-24';
+                liveNode.className = `live-item ${extraClass} h-14 ${item.color} text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center transition-all duration-500 border border-white/10`;
+                liveNode.setAttribute('data-id', item.id);
+                liveNode.textContent = item.label;
+                liveContainer.appendChild(liveNode);
+            });
+
+            // Update Axis Visualizer Indicators
+            updateAxisIndicators(level.baseCSS || "display: flex;");
+
+            // Hide success banner & disable Next button initially
+            document.getElementById('success-banner').classList.add('hidden');
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('prev-btn').disabled = index === 0;
+        }
+
+        function updateAxisIndicators(cssString) {
+            const isColumn = cssString.includes('flex-direction: column') || cssString.includes('flex-flow: column');
+            const isRowReverse = cssString.includes('flex-direction: row-reverse') || cssString.includes('flex-flow: row-reverse');
+            const isColReverse = cssString.includes('flex-direction: column-reverse') || cssString.includes('flex-flow: column-reverse');
+
+            const mainText = document.getElementById('main-axis-text');
+            const mainIcon = document.getElementById('main-axis-icon');
+            const crossText = document.getElementById('cross-axis-text');
+            const crossIcon = document.getElementById('cross-axis-icon');
+
+            if (isColumn || isColReverse) {
+                mainText.textContent = "Main: Column";
+                mainIcon.className = isColReverse ? "fa-solid fa-arrow-up text-[10px]" : "fa-solid fa-arrow-down text-[10px]";
+                crossText.textContent = "Cross: Row";
+                crossIcon.className = "fa-solid fa-arrow-right text-[10px]";
+            } else {
+                mainText.textContent = "Main: Row";
+                mainIcon.className = isRowReverse ? "fa-solid fa-arrow-left text-[10px]" : "fa-solid fa-arrow-right text-[10px]";
+                crossText.textContent = "Cross: Column";
+                crossIcon.className = "fa-solid fa-arrow-down text-[10px]";
+            }
+        }
+
+        function selectOption(idx) {
+            if (isLevelCompleted) return;
+
+            const level = levels[currentLevelIndex];
+            const optionsContainer = document.getElementById('options-container');
+            const buttons = optionsContainer.children;
+            const selectedOpt = level.options[idx];
+
+            // Highlight chosen button visually
+            for (let i = 0; i < buttons.length; i++) {
+                if (i === idx) {
+                    buttons[i].className = "w-full text-left px-4 py-3 rounded-xl border border-indigo-500 bg-indigo-950/50 text-xs md:text-sm font-mono text-indigo-200 transition flex items-center justify-between shadow-lg shadow-indigo-500/10 cursor-pointer";
+                    buttons[i].querySelector('i').className = "fa-solid fa-circle-check text-indigo-400 shrink-0 ml-2";
+                } else {
+                    buttons[i].className = "w-full text-left px-4 py-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800/80 text-xs md:text-sm font-mono text-slate-300 transition flex items-center justify-between opacity-50 cursor-pointer";
+                    buttons[i].querySelector('i').className = "fa-regular fa-circle text-slate-700 shrink-0 ml-2";
+                }
+            }
+
+            // Display dynamic code in code block
+            document.getElementById('dynamic-properties').innerHTML = `<span class="text-indigo-400">${selectedOpt.code}</span>`;
+
+            // IMMEDIATE DYNAMIC PREVIEW REACTION
+            const liveContainer = document.getElementById('live-flex-container');
+            const liveItems = liveContainer.querySelectorAll('.live-item');
+
+            // Handle Item-level properties vs Container-level properties
+            if (typeof level.targetItemIndex !== 'undefined') {
+                // Apply base container styles
+                liveContainer.style.cssText = level.baseCSS || "display: flex;";
+                
+                // Reset item styles & apply chosen style to target item
+                liveItems.forEach((itemEl, itemIdx) => {
+                    if (itemIdx === level.targetItemIndex) {
+                        itemEl.style.cssText = selectedOpt.code;
+                    } else {
+                        itemEl.style.cssText = "";
+                    }
+                });
+            } else {
+                // Container-level property update
+                const combinedCSS = `${level.baseCSS || 'display: flex;'} ${selectedOpt.code}`;
+                liveContainer.style.cssText = combinedCSS;
+                updateAxisIndicators(combinedCSS);
+            }
+
+            // Check match condition after transition frame
+            setTimeout(() => {
+                if (idx === level.correctOption) {
+                    isLevelCompleted = true;
+                    score += 10;
+                    document.getElementById('score-indicator').textContent = score;
+                    document.getElementById('success-banner').classList.remove('hidden');
+                    document.getElementById('next-btn').disabled = false;
+
+                    // Lock selection buttons on level completion
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('cursor-pointer');
+                        buttons[i].classList.add('cursor-default');
+                        buttons[i].onclick = null;
+                    }
+                } else {
+                    liveContainer.classList.add('animate-pulse');
+                    setTimeout(() => liveContainer.classList.remove('animate-pulse'), 500);
+                }
+            }, 300);
+        }
+
+        function nextLevel() {
+            if (currentLevelIndex < levels.length - 1) {
+                currentLevelIndex++;
+                loadLevel(currentLevelIndex);
+            } else {
+                showCompletionModal();
+            }
+        }
+
+        function prevLevel() {
+            if (currentLevelIndex > 0) {
+                currentLevelIndex--;
+                loadLevel(currentLevelIndex);
+            }
+        }
+
+        function showCompletionModal() {
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('completion-modal').classList.remove('hidden');
+            document.getElementById('completion-modal').classList.add('flex');
+        }
+
+        function resetGame() {
+            currentLevelIndex = 0;
+            score = 0;
+            document.getElementById('completion-modal').classList.add('hidden');
+            document.getElementById('completion-modal').classList.remove('flex');
+            initGame();
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
